@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -15,8 +16,20 @@ class Profile(BaseModel):
     #       bitbucket_url = 'pydanny'
     #       google_code_url = 'pydanny'
     steem_account = models.CharField(_("Steem account"), null=True, blank=True, max_length=40, unique=True)
+    steem_account_confirmed = models.BooleanField(
+        _("Steem account confirmed"), null=False, blank=True, default=False
+    )
+
     steemit_chat_account = models.CharField(_("Steemit.chat account"), null=True, blank=True, max_length=40, unique=True)
+    steemit_chat_account_confirmed = models.BooleanField(
+        _("Steemit.chat account confirmed"), null=False, blank=True, default=False
+    )
+
     github_account = models.CharField(_("Github account"), null=True, blank=True, max_length=40)
+    github_account_confirmed = models.BooleanField(
+        _("Github account confirmed"), null=False, blank=True, default=False
+    )
+
     github_url = models.CharField(_("Github account"), null=True, blank=True, max_length=100, editable=False)
     bitbucket_url = models.CharField(_("Bitbucket account"), null=True, blank=True, max_length=100)
     google_code_url = models.CharField(_("Google Code account"), null=True, blank=True, max_length=100)
@@ -77,14 +90,13 @@ class Profile(BaseModel):
         packages.sort(key=lambda a: a.title)
         return packages
 
-    @models.permalink
     def get_absolute_url(self):
         if self.steem_account:
-            return "steem_profile_detail", [self.steem_account]
+            return reverse('steem_profile_detail', args=(self.steem_account,))
         if self.github_account:
-            return "github_profile_detail", [self.github_account]
+            return reverse('github_profile_detail', args=(self.github_account,))
         if self.user.username:
-            return "id_profile_detail", [self.user.pk]
+            return reverse('id_profile_detail', args=(self.user.pk,))
 
     # define permission properties as properties so we can access in templates
 
